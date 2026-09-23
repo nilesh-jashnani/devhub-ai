@@ -1,0 +1,94 @@
+model User {
+  id            String         @id @default(cuid(2))
+  name          String?
+  email         String?        @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  role          UserRole       @default(USER)
+
+  notes         Note[]
+  bookmarks     Bookmark[]
+  aiGenerations AiGeneration[]
+  progress      Progress[]
+
+  createdAt DateTime @default(now())
+  updatedAt temporal.updatedAt()
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+model Note {
+  id        String  @id @default(cuid(2))
+  title     String
+  slug      String  @unique
+  content   String
+  published Boolean @default(false)
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+
+  bookmarks     Bookmark[]
+  aiGenerations AiGeneration[]
+  progress      Progress[]
+
+  createdAt DateTime @default(now())
+  updatedAt temporal.updatedAt()
+}
+
+model Bookmark {
+  id String @id @default(cuid(2))
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  noteId String
+  note   Note   @relation(fields: [noteId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model AiGeneration {
+  id       String           @id @default(cuid(2))
+  type     AiGenerationType
+  prompt   String
+  response String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  noteId String?
+  note   Note?  @relation(fields: [noteId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+enum AiGenerationType {
+  EXPLAIN
+  SIMPLE_EXPLANATION
+  SUMMARY
+  INTERVIEW_QUESTIONS
+  FLASHCARDS
+  CODE_EXAMPLE
+  STUDY_PLAN
+  KNOWLEDGE_GAP
+}
+
+model Progress {
+  id           String   @id @default(cuid(2))
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+
+  noteId       String
+  note         Note     @relation(fields: [noteId], references: [id])
+
+  completed    Boolean  @default(false)
+  score        Int?
+  lastViewedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt temporal.updatedAt()
+}
