@@ -49,6 +49,8 @@ model Bookmark {
   note   Note   @relation(fields: [noteId], references: [id])
 
   createdAt DateTime @default(now())
+
+  @@unique([userId, noteId])
 }
 
 model AiGeneration {

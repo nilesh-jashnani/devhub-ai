@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Brain, BookOpen, Sparkles } from "lucide-react";
 import { APP_NAME } from "@/lib/constants";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,9 +18,6 @@ export default function Home() {
     <main className="min-h-screen bg-background">
       <section className="mx-auto flex min-h-[80vh] max-w-6xl flex-col justify-center px-6 py-20">
         <div className="max-w-3xl">
-          {/* <Badge variant="secondary" className="mb-6">
-            Next.js 16 · TypeScript · AI
-          </Badge> */}
 
           <h1 className="text-5xl font-bold tracking-tight sm:text-6xl">
             Your developer knowledge base,
@@ -41,7 +37,7 @@ export default function Home() {
             </Button>
 
             <Button variant="outline" size="lg">
-              <Link href="/notes">Explore Notes</Link>
+              <Link href="/dashboard/notes">Explore Notes</Link>
             </Button>
           </div>
         </div>
