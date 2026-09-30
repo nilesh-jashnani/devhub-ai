@@ -5,8 +5,10 @@ import { APP_NAME } from "@/lib/constants";
 
 export default async function DashboardLayout({
   children,
+  modal
 }: {
   children: React.ReactNode;
+  modal: React.ReactNode;
 }) {
   const session = await isUser();
 
@@ -69,6 +71,7 @@ export default async function DashboardLayout({
       </header>
 
       <main>{children}</main>
+      {modal}
     </div>
   );
 }
