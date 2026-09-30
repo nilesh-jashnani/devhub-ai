@@ -15,7 +15,7 @@ function getHeaders(): HeadersInit {
     "Content-Type": "application/json",
     Authorization: `Bearer ${apiKey}`,
     "HTTP-Referer": "http://localhost:3000",
-    "X-Title": "DevVault AI",
+    "X-Title": "DevHub AI",
   };
 }
 

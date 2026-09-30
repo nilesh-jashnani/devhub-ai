@@ -2,8 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { db } from "@/prisma/db";
-import { updateNote } from "@/actions/notes";
 import { isUser } from "@/lib/auth-helper";
+
+import { EditNoteForm } from "@/components/notes/edit-note-form";
 
 type EditNotePageProps = {
     params: Promise<{
@@ -18,10 +19,12 @@ export default async function EditNotePage({
 
     const { slug } = await params;
 
-    const note = await db.orm.public.Note.first({
-        slug,
-        authorId: session.user.id,
-    });
+    const note =
+        await db.orm.public.Note.first({
+            slug,
+            authorId:
+                session.user.id,
+        });
 
     if (!note) {
         notFound();
@@ -40,57 +43,19 @@ export default async function EditNotePage({
                 <h1 className="mt-4 text-3xl font-bold">
                     Edit Note
                 </h1>
+
+                <p className="mt-2 text-muted-foreground">
+                    Update your saved knowledge.
+                </p>
             </div>
 
-            <form action={updateNote} className="space-y-6">
-                <input
-                    type="hidden"
-                    name="noteId"
-                    value={note.id}
-                />
-
-                <div>
-                    <label
-                        htmlFor="title"
-                        className="mb-2 block text-sm font-medium"
-                    >
-                        Title
-                    </label>
-
-                    <input
-                        id="title"
-                        name="title"
-                        defaultValue={note.title}
-                        required
-                        className="w-full rounded-md border px-3 py-2"
-                    />
-                </div>
-
-                <div>
-                    <label
-                        htmlFor="content"
-                        className="mb-2 block text-sm font-medium"
-                    >
-                        Content
-                    </label>
-
-                    <textarea
-                        id="content"
-                        name="content"
-                        defaultValue={note.content}
-                        required
-                        rows={14}
-                        className="w-full rounded-md border px-3 py-2"
-                    />
-                </div>
-
-                <button
-                    type="submit"
-                    className="rounded-md bg-black px-4 py-2 text-white cursor-pointer"
-                >
-                    Save Changes
-                </button>
-            </form>
+            <EditNoteForm
+                note={{
+                    id: note.id,
+                    title: note.title,
+                    content: note.content,
+                }}
+            />
         </main>
     );
 }

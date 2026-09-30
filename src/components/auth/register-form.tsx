@@ -1,106 +1,208 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useActionState } from "react";
 
-import { registerUser } from "@/actions/auth";
+import {
+    registerUser,
+    type RegisterActionState,
+} from "@/actions/auth";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+const initialState: RegisterActionState = {
+    errors: {},
+    values: {},
+    message: "",
+};
 
 export function RegisterForm() {
-    const router = useRouter();
-
-    const [error, setError] = useState("");
-
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
-    async function handleSubmit(formData: FormData) {
-        setError("");
-        setIsSubmitting(true);
-
-        const result = await registerUser(formData);
-
-        setIsSubmitting(false);
-
-        if (result?.error) {
-            setError(result.error);
-            return;
-        }
-
-        router.push("/login");
-    }
+    const [
+        state,
+        formAction,
+        isPending,
+    ] = useActionState(
+        registerUser,
+        initialState,
+    );
 
     return (
-        <form action={handleSubmit} className="space-y-5">
-            <div>
-                <label
-                    htmlFor="name"
-                    className="mb-2 block text-sm font-medium"
-                >
+        <form
+            action={formAction}
+            className="space-y-5"
+            noValidate
+        >
+            <div className="space-y-2">
+                <Label htmlFor="name">
                     Name
-                </label>
+                </Label>
 
-                <input
+                <Input
                     id="name"
                     name="name"
                     type="text"
-                    required
                     autoComplete="name"
-                    className="w-full rounded-md border px-3 py-2"
                     placeholder="Your name"
+                    defaultValue={
+                        state.values?.name ?? ""
+                    }
+                    aria-invalid={
+                        Boolean(
+                            state.errors?.name,
+                        )
+                    }
+                    aria-describedby={
+                        state.errors?.name
+                            ? "name-error"
+                            : undefined
+                    }
                 />
+
+                {state.errors?.name?.map(
+                    (error) => (
+                        <p
+                            id="name-error"
+                            key={error}
+                            className="text-sm text-destructive"
+                        >
+                            {error}
+                        </p>
+                    ),
+                )}
             </div>
 
-            <div>
-                <label
-                    htmlFor="email"
-                    className="mb-2 block text-sm font-medium"
-                >
+            <div className="space-y-2">
+                <Label htmlFor="email">
                     Email
-                </label>
+                </Label>
 
-                <input
+                <Input
                     id="email"
                     name="email"
                     type="email"
-                    required
                     autoComplete="email"
-                    className="w-full rounded-md border px-3 py-2"
                     placeholder="you@example.com"
+                    defaultValue={
+                        state.values?.email ?? ""
+                    }
+                    aria-invalid={
+                        Boolean(
+                            state.errors?.email,
+                        )
+                    }
+                    aria-describedby={
+                        state.errors?.email
+                            ? "register-email-error"
+                            : undefined
+                    }
                 />
+
+                {state.errors?.email?.map(
+                    (error) => (
+                        <p
+                            id="register-email-error"
+                            key={error}
+                            className="text-sm text-destructive"
+                        >
+                            {error}
+                        </p>
+                    ),
+                )}
             </div>
 
-            <div>
-                <label
-                    htmlFor="password"
-                    className="mb-2 block text-sm font-medium"
-                >
+            <div className="space-y-2">
+                <Label htmlFor="password">
                     Password
-                </label>
+                </Label>
 
-                <input
+                <Input
                     id="password"
                     name="password"
                     type="password"
-                    required
-                    minLength={8}
                     autoComplete="new-password"
-                    className="w-full rounded-md border px-3 py-2"
                     placeholder="At least 8 characters"
+                    aria-invalid={
+                        Boolean(
+                            state.errors?.password,
+                        )
+                    }
+                    aria-describedby={
+                        state.errors?.password
+                            ? "register-password-error"
+                            : undefined
+                    }
                 />
+
+                {state.errors?.password?.map(
+                    (error) => (
+                        <p
+                            id="register-password-error"
+                            key={error}
+                            className="text-sm text-destructive"
+                        >
+                            {error}
+                        </p>
+                    ),
+                )}
             </div>
 
-            {error && (
-                <p className="text-sm text-red-600">
-                    {error}
+            <div className="space-y-2">
+                <Label htmlFor="confirmPassword">
+                    Confirm password
+                </Label>
+
+                <Input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    autoComplete="new-password"
+                    placeholder="Re-enter your password"
+                    aria-invalid={
+                        Boolean(
+                            state.errors
+                                ?.confirmPassword,
+                        )
+                    }
+                    aria-describedby={
+                        state.errors
+                            ?.confirmPassword
+                            ? "confirm-password-error"
+                            : undefined
+                    }
+                />
+
+                {state.errors
+                    ?.confirmPassword
+                    ?.map((error) => (
+                        <p
+                            id="confirm-password-error"
+                            key={error}
+                            className="text-sm text-destructive"
+                        >
+                            {error}
+                        </p>
+                    ))}
+            </div>
+
+            {state.message && (
+                <p
+                    role="alert"
+                    className="text-sm text-destructive"
+                >
+                    {state.message}
                 </p>
             )}
 
-            <button
+            <Button
                 type="submit"
-                disabled={isSubmitting}
-                className="w-full rounded-md bg-black px-4 py-2 text-sm text-white disabled:opacity-50 cursor-pointer"
+                disabled={isPending}
+                className="w-full cursor-pointer"
             >
-                {isSubmitting ? "Creating account..." : "Create account"}
-            </button>
+                {isPending
+                    ? "Creating account..."
+                    : "Create account"}
+            </Button>
         </form>
     );
 }

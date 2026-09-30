@@ -1,19 +1,20 @@
 import { auth } from "@/auth";
 import { db } from "@/prisma/db";
-import { z } from "zod";
-
-const progressSchema = z.object({
-  noteId: z.string().min(1),
-  completed: z.boolean(),
-  score: z.number().min(0).max(100).nullable().optional(),
-});
+import { progressSchema } from "@/lib/validations/progress";
 
 export async function POST(request: Request) {
   try {
     const session = await auth();
 
     if (!session?.user?.id) {
-      return Response.json({ error: "Unauthorized" }, { status: 401 });
+      return Response.json(
+        {
+          error: "Unauthorized",
+        },
+        {
+          status: 401,
+        },
+      );
     }
 
     const body = await request.json();
@@ -22,8 +23,12 @@ export async function POST(request: Request) {
 
     if (!parsed.success) {
       return Response.json(
-        { error: "Invalid progress data." },
-        { status: 400 },
+        {
+          error: "Invalid progress data.",
+        },
+        {
+          status: 400,
+        },
       );
     }
 
@@ -35,7 +40,14 @@ export async function POST(request: Request) {
     });
 
     if (!note) {
-      return Response.json({ error: "Note not found." }, { status: 404 });
+      return Response.json(
+        {
+          error: "Note not found.",
+        },
+        {
+          status: 404,
+        },
+      );
     }
 
     const existingProgress = await db.orm.public.Progress.first({
@@ -48,6 +60,7 @@ export async function POST(request: Request) {
     if (existingProgress) {
       await db.orm.public.Progress.where({
         id: existingProgress.id,
+
         userId: session.user.id,
       }).update({
         completed,
@@ -57,18 +70,24 @@ export async function POST(request: Request) {
     } else {
       await db.orm.public.Progress.create({
         userId: session.user.id,
+
         noteId,
+
         completed,
+
         score: score ?? null,
+
         lastViewedAt: now,
       });
     }
 
     return Response.json({
       success: true,
+
       progress: {
         completed,
         score: score ?? null,
+
         lastViewedAt: now.toString(),
       },
     });
@@ -77,10 +96,11 @@ export async function POST(request: Request) {
 
     return Response.json(
       {
-        error:
-          error instanceof Error ? error.message : "Progress update failed.",
+        error: "Unable to save progress.",
       },
-      { status: 500 },
+      {
+        status: 500,
+      },
     );
   }
 }

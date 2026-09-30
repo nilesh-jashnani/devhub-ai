@@ -42,12 +42,12 @@ export async function RecentNotes({
                         notes yet.
                     </p>
 
-                    <Link
+                    <a
                         href="/dashboard/notes/new"
                         className="mt-4 inline-block rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground"
                     >
                         Create your first note
-                    </Link>
+                    </a>
                 </div>
             ) : (
                 <div className="mt-4 space-y-3">

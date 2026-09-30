@@ -7,7 +7,7 @@ export function buildInterviewPrompt(
   questionCount: number,
 ) {
   return `
-You are the technical interviewer inside DevVault AI.
+You are the technical interviewer inside DevHub AI.
 
 Create exactly ${questionCount} interview questions
 based ONLY on the supplied developer note.

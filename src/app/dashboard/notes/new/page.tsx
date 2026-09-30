@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { createNote } from "@/actions/notes";
+
+import { CreateNoteForm } from "@/components/notes/create-note-form";
 
 export default function NewNotePage() {
     return (
@@ -17,54 +18,12 @@ export default function NewNotePage() {
                 </h1>
 
                 <p className="mt-2 text-muted-foreground">
-                    Save something you want to learn, remember, or practice.
+                    Save something you want to learn,
+                    remember, or practice.
                 </p>
             </div>
 
-            <form action={createNote} className="space-y-6">
-                <div>
-                    <label
-                        htmlFor="title"
-                        className="mb-2 block text-sm font-medium"
-                    >
-                        Title
-                    </label>
-
-                    <input
-                        id="title"
-                        name="title"
-                        type="text"
-                        required
-                        className="w-full rounded-md border px-3 py-2"
-                        placeholder="e.g. React Server Components"
-                    />
-                </div>
-
-                <div>
-                    <label
-                        htmlFor="content"
-                        className="mb-2 block text-sm font-medium"
-                    >
-                        Content
-                    </label>
-
-                    <textarea
-                        id="content"
-                        name="content"
-                        required
-                        rows={12}
-                        className="w-full rounded-md border px-3 py-2"
-                        placeholder="Write your knowledge here..."
-                    />
-                </div>
-
-                <button
-                    type="submit"
-                    className="rounded-md bg-black px-4 py-2 text-white cursor-pointer"
-                >
-                    Create Note
-                </button>
-            </form>
+            <CreateNoteForm />
         </main>
     );
 }

@@ -45,12 +45,12 @@ export default async function NotesPage({
                     </p>
                 </div>
 
-                <Link
+                <a
                     href="/dashboard/notes/new"
                     className="rounded-md bg-black px-4 py-2 text-sm text-white"
                 >
                     New Note
-                </Link>
+                </a>
             </div>
 
             <div className="mt-6">
@@ -69,12 +69,12 @@ export default async function NotesPage({
                             : "Create your first note to start building your knowledge base."}
                     </p>
 
-                    {!search && (<Link
+                    {!search && (<a
                         href="/dashboard/notes/new"
                         className="mt-4 inline-block rounded-md border px-4 py-2 text-sm"
                     >
                         Create your first note
-                    </Link>)}
+                    </a>)}
                 </div>
             ) : (
                 <div className="mt-8 grid gap-4 md:grid-cols-2">

@@ -1,71 +1,130 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState } from "react";
 
-import { signIn } from "next-auth/react";
+import {
+    loginUser,
+    type LoginActionState,
+} from "@/actions/auth";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+const initialState: LoginActionState = {
+    errors: {},
+    values: {},
+    message: "",
+};
+
 function LoginForm() {
-    const [error, setError] = useState("");
-
-    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-
-        setError("");
-
-        const formData = new FormData(event.currentTarget);
-
-        const result = await signIn("credentials", {
-            email: formData.get("email"),
-            password: formData.get("password"),
-            redirect: false,
-        });
-
-        if (result?.error) {
-            setError("Invalid email or password.");
-            return;
-        }
-
-        window.location.href = "/dashboard";
-    }
+    const [
+        state,
+        formAction,
+        isPending,
+    ] = useActionState(
+        loginUser,
+        initialState,
+    );
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form
+            action={formAction}
+            className="space-y-5"
+            noValidate
+        >
             <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">
+                    Email
+                </Label>
 
                 <Input
                     id="email"
                     name="email"
                     type="email"
+                    autoComplete="email"
                     placeholder="you@example.com"
-                    required
+                    defaultValue={
+                        state.values?.email ?? ""
+                    }
+                    aria-invalid={
+                        Boolean(
+                            state.errors?.email,
+                        )
+                    }
+                    aria-describedby={
+                        state.errors?.email
+                            ? "email-error"
+                            : undefined
+                    }
                 />
+
+                {state.errors?.email?.map(
+                    (error) => (
+                        <p
+                            id="email-error"
+                            key={error}
+                            className="text-sm text-destructive"
+                        >
+                            {error}
+                        </p>
+                    ),
+                )}
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">
+                    Password
+                </Label>
 
                 <Input
                     id="password"
                     name="password"
                     type="password"
+                    autoComplete="current-password"
                     placeholder="••••••••"
-                    required
+                    aria-invalid={
+                        Boolean(
+                            state.errors?.password,
+                        )
+                    }
+                    aria-describedby={
+                        state.errors?.password
+                            ? "password-error"
+                            : undefined
+                    }
                 />
+
+                {state.errors?.password?.map(
+                    (error) => (
+                        <p
+                            id="password-error"
+                            key={error}
+                            className="text-sm text-destructive"
+                        >
+                            {error}
+                        </p>
+                    ),
+                )}
             </div>
 
-            {error && (
-                <p className="text-sm text-destructive">
-                    {error}
+            {state.message && (
+                <p
+                    role="alert"
+                    className="text-sm text-destructive"
+                >
+                    {state.message}
                 </p>
             )}
 
-            <Button type="submit" className="w-full cursor-pointer">
-                Sign in
+            <Button
+                type="submit"
+                disabled={isPending}
+                className="w-full cursor-pointer"
+            >
+                {isPending
+                    ? "Signing in..."
+                    : "Sign in"}
             </Button>
         </form>
     );

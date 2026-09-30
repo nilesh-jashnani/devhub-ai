@@ -1,77 +1,148 @@
 "use server";
 
-import { auth } from "@/auth";
-import { db } from "@/prisma/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { noteSchema } from "@/lib/validations/notes";
 
-export async function createNote(formData: FormData): Promise<void> {
-  const session = await auth();
+import { auth } from "@/auth";
+import { db } from "@/prisma/db";
 
-  if (!session?.user?.id) {
-    throw new Error("You must be logged in.");
-  }
+import {
+  noteIdSchema,
+  noteSchema,
+  updateNoteSchema,
+} from "@/lib/validations/notes";
 
-  const result = noteSchema.safeParse({
-    title: formData.get("title"),
-    content: formData.get("content"),
-  });
+export type NoteActionState = {
+  errors?: {
+    title?: string[];
+    content?: string[];
+    noteId?: string[];
+  };
 
-  if (!result.success) {
-    throw new Error(result.error.issues[0]?.message ?? "Invalid note.");
-  }
+  values?: {
+    title?: string;
+    content?: string;
+  };
 
-  const { title, content } = result.data;
+  message?: string;
+};
 
-  const createdSlug = title
+function createSlug(title: string) {
+  return title
     .toLowerCase()
+    .trim()
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-
-  let slug = createdSlug;
-  const existingNote = await db.orm.public.Note.first({
-    slug,
-  });
-
-  if (existingNote) {
-    slug = `${createdSlug}-${Date.now()}`;
-  }
-
-  const note = await db.orm.public.Note.create({
-    title,
-    slug,
-    content,
-    authorId: session.user.id,
-  });
-
-  revalidatePath(`/dashboard/notes/${note.slug}`);
-  redirect(`/dashboard/notes/${note.slug}`);
+    .replace(/^-+|-+$/g, "");
 }
 
-export async function updateNote(formData: FormData): Promise<void> {
+async function createUniqueSlug(title: string, currentNoteId?: string) {
+  const baseSlug = createSlug(title) || "note";
+
+  let slug = baseSlug;
+  let counter = 1;
+
+  while (true) {
+    const existingNote = await db.orm.public.Note.first({
+      slug,
+    });
+
+    if (!existingNote || existingNote.id === currentNoteId) {
+      return slug;
+    }
+
+    slug = `${baseSlug}-${counter}`;
+    counter += 1;
+  }
+}
+
+export async function createNote(
+  _previousState: NoteActionState,
+  formData: FormData,
+): Promise<NoteActionState> {
   const session = await auth();
 
   if (!session?.user?.id) {
-    throw new Error("You must be logged in.");
+    redirect("/login");
   }
 
-  const noteId = String(formData.get("noteId") ?? "");
+  const rawTitle = formData.get("title");
 
-  if (!noteId) {
-    throw new Error("Note ID is required.");
-  }
+  const rawContent = formData.get("content");
 
   const result = noteSchema.safeParse({
-    title: formData.get("title"),
-    content: formData.get("content"),
+    title: rawTitle,
+    content: rawContent,
   });
 
   if (!result.success) {
-    throw new Error(result.error.issues[0]?.message ?? "Invalid note.");
+    return {
+      errors: result.error.flatten().fieldErrors,
+
+      values: {
+        title: typeof rawTitle === "string" ? rawTitle : "",
+
+        content: typeof rawContent === "string" ? rawContent : "",
+      },
+    };
   }
 
   const { title, content } = result.data;
+
+  try {
+    const slug = await createUniqueSlug(title);
+
+    const note = await db.orm.public.Note.create({
+      title,
+      slug,
+      content,
+      authorId: session.user.id,
+    });
+
+    revalidatePath("/dashboard/notes");
+
+    revalidatePath("/dashboard");
+
+    redirect(`/dashboard/notes/${note.slug}`);
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function updateNote(
+  _previousState: NoteActionState,
+  formData: FormData,
+): Promise<NoteActionState> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    redirect("/login");
+  }
+
+  const rawNoteId = formData.get("noteId");
+
+  const rawTitle = formData.get("title");
+
+  const rawContent = formData.get("content");
+
+  const result = updateNoteSchema.safeParse({
+    noteId: rawNoteId,
+    title: rawTitle,
+    content: rawContent,
+  });
+
+  if (!result.success) {
+    return {
+      errors: result.error.flatten().fieldErrors,
+
+      values: {
+        title: typeof rawTitle === "string" ? rawTitle : "",
+
+        content: typeof rawContent === "string" ? rawContent : "",
+      },
+    };
+  }
+
+  const { noteId, title, content } = result.data;
 
   const note = await db.orm.public.Note.first({
     id: noteId,
@@ -79,25 +150,42 @@ export async function updateNote(formData: FormData): Promise<void> {
   });
 
   if (!note) {
-    throw new Error("Note not found.");
+    return {
+      values: {
+        title,
+        content,
+      },
+
+      message: "Note not found or you do not have permission to edit it.",
+    };
   }
 
-  const slug = title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
+  const oldSlug = note.slug;
 
-  await db.orm.public.Note.where({
-    id: noteId,
-    authorId: session.user.id,
-  }).update({
-    title,
-    slug,
-    content,
-  });
+  try {
+    const slug = await createUniqueSlug(title, noteId);
 
-  revalidatePath(`/dashboard/notes/${slug}`);
-  redirect(`/dashboard/notes/${slug}`);
+    await db.orm.public.Note.where({
+      id: noteId,
+      authorId: session.user.id,
+    }).update({
+      title,
+      slug,
+      content,
+    });
+
+    revalidatePath("/dashboard/notes");
+
+    revalidatePath("/dashboard");
+
+    revalidatePath(`/dashboard/notes/${oldSlug}`);
+
+    revalidatePath(`/dashboard/notes/${slug}`);
+
+    redirect(`/dashboard/notes/${slug}`);
+  } catch (error) {
+    throw error;
+  }
 }
 
 export async function deleteNote(formData: FormData): Promise<void> {
@@ -107,16 +195,33 @@ export async function deleteNote(formData: FormData): Promise<void> {
     redirect("/login");
   }
 
-  const noteId = String(formData.get("noteId") ?? "");
+  const result = noteIdSchema.safeParse({
+    noteId: formData.get("noteId"),
+  });
 
-  if (!noteId) {
-    throw new Error("Note ID is required.");
+  if (!result.success) {
+    throw new Error("Invalid note ID.");
+  }
+
+  const { noteId } = result.data;
+
+  const note = await db.orm.public.Note.first({
+    id: noteId,
+    authorId: session.user.id,
+  });
+
+  if (!note) {
+    redirect("/dashboard/notes");
   }
 
   await db.orm.public.Note.where({
     id: noteId,
     authorId: session.user.id,
   }).delete();
+
+  revalidatePath("/dashboard/notes");
+
+  revalidatePath("/dashboard");
 
   redirect("/dashboard/notes");
 }
@@ -128,18 +233,27 @@ export async function toggleBookmark(formData: FormData): Promise<void> {
     redirect("/login");
   }
 
-  const noteId = String(formData.get("noteId") ?? "");
+  const result = noteIdSchema.safeParse({
+    noteId: formData.get("noteId"),
+  });
 
-  if (!noteId) {
-    throw new Error("Note ID is required.");
+  if (!result.success) {
+    throw new Error("Invalid note ID.");
   }
+
+  const { noteId } = result.data;
 
   const note = await db.orm.public.Note.first({
     id: noteId,
+
+    // IMPORTANT:
+    // ensure the note belongs to
+    // the logged-in user.
+    authorId: session.user.id,
   });
 
   if (!note) {
-    throw new Error("Note not found.");
+    redirect("/dashboard/notes");
   }
 
   const existingBookmark = await db.orm.public.Bookmark.first({
@@ -158,6 +272,12 @@ export async function toggleBookmark(formData: FormData): Promise<void> {
       noteId,
     });
   }
+
+  revalidatePath("/dashboard/bookmarks");
+
+  revalidatePath(`/dashboard/notes/${note.slug}`);
+
+  revalidatePath("/dashboard");
 
   redirect(`/dashboard/notes/${note.slug}`);
 }

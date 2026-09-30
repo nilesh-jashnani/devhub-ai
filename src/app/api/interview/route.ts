@@ -32,11 +32,10 @@ export async function POST(request: Request) {
 
     const { noteId, difficulty, questionCount } = parsed.data;
 
-    const notes = await db.orm.public.Note.all();
-
-    const note = notes.find(
-      (item) => item.id === noteId && item.authorId === session.user.id,
-    );
+    const note = await db.orm.public.Note.first({
+      id: noteId,
+      authorId: session.user.id,
+    });
 
     if (!note) {
       return Response.json(
@@ -115,10 +114,7 @@ export async function POST(request: Request) {
 
     return Response.json(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Interview generation failed.",
+        error: "Interview generation failed.",
       },
       { status: 500 },
     );

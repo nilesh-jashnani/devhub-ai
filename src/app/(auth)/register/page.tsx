@@ -8,13 +8,6 @@ export default function RegisterPage() {
         <main className="flex min-h-screen items-center justify-center px-6 py-12">
             <div className="w-full max-w-md">
                 <div className="mb-8 text-center">
-                    <Link
-                        href="/"
-                        className="text-2xl font-bold"
-                    >
-                        {APP_NAME}
-                    </Link>
-
                     <h1 className="mt-6 text-3xl font-bold">
                         Create your account
                     </h1>

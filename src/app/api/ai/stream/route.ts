@@ -86,9 +86,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("AI stream route failed:", error);
 
-    const message = error instanceof Error ? error.message : "AI streaming failed.";
-
-    return new Response(message, {
+    return new Response("AI streaming failed.", {
       status: 500,
     });
   }

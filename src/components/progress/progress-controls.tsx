@@ -1,6 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import {
+    startTransition,
+    useOptimistic,
+    useState,
+} from "react";
 
 type ProgressControlsProps = {
     noteId: string;
@@ -8,55 +12,72 @@ type ProgressControlsProps = {
     initialScore: number | null;
 };
 
+type ProgressState = {
+    completed: boolean;
+    score: number | null;
+};
+
 export function ProgressControls({
     noteId,
     initialCompleted,
     initialScore,
 }: ProgressControlsProps) {
-    const [completed, setCompleted] =
-        useState(initialCompleted);
+    const [progress, setProgress] =
+        useState<ProgressState>({
+            completed:
+                initialCompleted,
+            score:
+                initialScore,
+        });
 
-    const [score, setScore] =
-        useState<number | null>(
-            initialScore
-        );
+    const [
+        optimisticProgress,
+        setOptimisticProgress,
+    ] = useOptimistic(progress);
 
-    const [saving, setSaving] =
-        useState(false);
+    const [
+        saving,
+        setSaving,
+    ] = useState(false);
 
-    const [message, setMessage] =
-        useState("");
+    const [
+        message,
+        setMessage,
+    ] = useState("");
 
-    const [error, setError] =
-        useState("");
+    const [
+        error,
+        setError,
+    ] = useState("");
 
     async function saveProgress(
-        nextCompleted: boolean,
-        nextScore: number | null
+        nextProgress: ProgressState,
     ) {
         setSaving(true);
         setMessage("");
         setError("");
 
         try {
-            const response = await fetch(
-                "/api/progress",
-                {
-                    method: "POST",
+            const response =
+                await fetch(
+                    "/api/progress",
+                    {
+                        method: "POST",
 
-                    headers: {
-                        "Content-Type":
-                            "application/json",
+                        headers: {
+                            "Content-Type":
+                                "application/json",
+                        },
+
+                        body: JSON.stringify({
+                            noteId,
+                            completed:
+                                nextProgress.completed,
+                            score:
+                                nextProgress.score,
+                        }),
                     },
-
-                    body: JSON.stringify({
-                        noteId,
-                        completed:
-                            nextCompleted,
-                        score: nextScore,
-                    }),
-                }
-            );
+                );
 
             const data =
                 await response.json();
@@ -64,53 +85,88 @@ export function ProgressControls({
             if (!response.ok) {
                 throw new Error(
                     data.error ??
-                    "Unable to save progress."
+                    "Unable to save progress.",
                 );
             }
 
+            setProgress(
+                nextProgress,
+            );
+
             setMessage(
-                "Progress saved successfully."
+                "Progress saved successfully.",
             );
         } catch (error) {
-            setError(
+            const errorMessage =
                 error instanceof Error
                     ? error.message
-                    : "Unable to save progress."
+                    : "Unable to save progress.";
+
+            setError(
+                errorMessage,
             );
+
+            throw error;
         } finally {
             setSaving(false);
         }
     }
 
-    async function handleCompletedChange() {
-        const previousCompleted =
-            completed;
+    function handleCompletedChange() {
+        const nextProgress = {
+            ...progress,
+            completed:
+                !optimisticProgress.completed,
+        };
 
-        const nextCompleted =
-            !completed;
-
-        /*
-         * Optimistic UI update.
-         */
-        setCompleted(nextCompleted);
-
-        try {
-            await saveProgress(
-                nextCompleted,
-                score
+        startTransition(async () => {
+            setOptimisticProgress(
+                nextProgress,
             );
-        } catch {
-            setCompleted(
-                previousCompleted
-            );
-        }
+
+            try {
+                await saveProgress(
+                    nextProgress,
+                );
+            } catch {
+                
+            }
+        });
     }
 
-    async function handleSaveScore() {
-        await saveProgress(
-            completed,
-            score
+    function handleScoreChange(
+        nextScore: number,
+    ) {
+        setProgress(
+            (current) => ({
+                ...current,
+                score:
+                    nextScore,
+            }),
         );
+    }
+
+    function handleSaveScore() {
+        const nextProgress = {
+            completed:
+                optimisticProgress.completed,
+            score:
+                progress.score,
+        };
+
+        startTransition(async () => {
+            setOptimisticProgress(
+                nextProgress,
+            );
+
+            try {
+                await saveProgress(
+                    nextProgress,
+                );
+            } catch {
+                // The server error is already displayed by saveProgress.
+            }
+        });
     }
 
     return (
@@ -121,8 +177,8 @@ export function ProgressControls({
                 </h2>
 
                 <p className="mt-1 text-sm text-muted-foreground">
-                    Track how confident you are
-                    with this topic.
+                    Track how confident
+                    you are with this topic.
                 </p>
             </div>
 
@@ -131,9 +187,11 @@ export function ProgressControls({
                     <input
                         type="checkbox"
                         checked={
-                            completed
+                            optimisticProgress.completed
                         }
-                        disabled={saving}
+                        disabled={
+                            saving
+                        }
                         onChange={
                             handleCompletedChange
                         }
@@ -141,8 +199,8 @@ export function ProgressControls({
                     />
 
                     <span className="text-sm font-medium">
-                        Mark this topic as
-                        completed
+                        Mark this topic
+                        as completed
                     </span>
                 </label>
             </div>
@@ -153,11 +211,14 @@ export function ProgressControls({
                         htmlFor="score"
                         className="text-sm font-medium"
                     >
-                        Understanding score
+                        Understanding
+                        score
                     </label>
 
                     <span className="text-sm font-semibold">
-                        {score ?? 0}%
+                        {progress.score ??
+                            0}
+                        %
                     </span>
                 </div>
 
@@ -167,22 +228,35 @@ export function ProgressControls({
                     min="0"
                     max="100"
                     step="5"
-                    value={score ?? 0}
-                    disabled={saving}
-                    onChange={(event) =>
-                        setScore(
+                    value={
+                        progress.score ??
+                        0
+                    }
+                    disabled={
+                        saving
+                    }
+                    onChange={(
+                        event,
+                    ) =>
+                        handleScoreChange(
                             Number(
-                                event.target
-                                    .value
-                            )
+                                event
+                                    .target
+                                    .value,
+                            ),
                         )
                     }
                     className="w-full cursor-pointer"
                 />
 
                 <div className="mt-1 flex justify-between text-xs text-muted-foreground">
-                    <span>Need practice</span>
-                    <span>Confident</span>
+                    <span>
+                        Need practice
+                    </span>
+
+                    <span>
+                        Confident
+                    </span>
                 </div>
 
                 <button
@@ -190,7 +264,9 @@ export function ProgressControls({
                     onClick={
                         handleSaveScore
                     }
-                    disabled={saving}
+                    disabled={
+                        saving
+                    }
                     className="mt-4 cursor-pointer rounded-md border px-4 py-2 text-sm hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     {saving
@@ -200,13 +276,19 @@ export function ProgressControls({
             </div>
 
             {message && (
-                <p className="mt-4 text-sm text-green-600">
+                <p
+                    role="status"
+                    className="mt-4 text-sm text-green-600"
+                >
                     {message}
                 </p>
             )}
 
             {error && (
-                <p className="mt-4 text-sm text-destructive">
+                <p
+                    role="alert"
+                    className="mt-4 text-sm text-destructive"
+                >
                     {error}
                 </p>
             )}

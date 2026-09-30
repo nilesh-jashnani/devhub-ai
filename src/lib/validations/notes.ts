@@ -15,3 +15,13 @@ export const noteSchema = z.object({
 });
 
 export type NoteInput = z.infer<typeof noteSchema>;
+
+export const updateNoteSchema = noteSchema.extend({
+  noteId: z.string().trim().min(1, "Note ID is required."),
+});
+
+export const noteIdSchema = z.object({
+  noteId: z.string().trim().min(1, "Note ID is required."),
+});
+
+export type UpdateNoteInput = z.infer<typeof updateNoteSchema>;
