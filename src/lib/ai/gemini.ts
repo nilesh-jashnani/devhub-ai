@@ -1,12 +1,21 @@
 import { GoogleGenAI } from "@google/genai";
+
 import type { AIProvider } from "./types";
 import { aiConfig } from "./config";
 
-const ai = new GoogleGenAI({
-  apiKey: aiConfig.gemini.apiKey,
-});
-
 const MAX_RETRIES = 3;
+
+function getClient() {
+  const apiKey = aiConfig.gemini.apiKey;
+
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY is not configured.");
+  }
+
+  return new GoogleGenAI({
+    apiKey,
+  });
+}
 
 function sleep(ms: number, signal?: AbortSignal) {
   return new Promise<void>((resolve, reject) => {
@@ -43,11 +52,17 @@ function isRetryableError(error: unknown) {
 }
 
 export const geminiProvider: AIProvider = {
-  async generateText(prompt: string) {
+  async generateText(prompt: string, signal?: AbortSignal) {
+    const ai = getClient();
+
     let lastError: unknown;
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       try {
+        if (signal?.aborted) {
+          throw new DOMException("The operation was aborted.", "AbortError");
+        }
+
         const response = await ai.models.generateContent({
           model: aiConfig.gemini.model,
           contents: prompt,
@@ -57,6 +72,10 @@ export const geminiProvider: AIProvider = {
       } catch (error) {
         lastError = error;
 
+        if (signal?.aborted) {
+          throw new DOMException("The operation was aborted.", "AbortError");
+        }
+
         if (!isRetryableError(error) || attempt === MAX_RETRIES) {
           throw error;
         }
@@ -65,7 +84,7 @@ export const geminiProvider: AIProvider = {
 
         console.warn(`Gemini request failed. Retrying in ${delay}ms...`);
 
-        await sleep(delay);
+        await sleep(delay, signal);
       }
     }
 
@@ -73,6 +92,8 @@ export const geminiProvider: AIProvider = {
   },
 
   async streamText(prompt: string, signal?: AbortSignal) {
+    const ai = getClient();
+
     async function* stream() {
       let lastError: unknown;
 

@@ -5,11 +5,15 @@ import { APP_NAME } from "../constants";
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 function getHeaders(): HeadersInit {
+  if (!aiConfig.openrouter.apiKey) {
+    throw new Error("OPENROUTER_API_KEY is not configured.");
+  }
+
   return {
     "Content-Type": "application/json",
     Authorization: `Bearer ${aiConfig.openrouter.apiKey}`,
     "HTTP-Referer": aiConfig.appUrl,
-    "X-Title": `${APP_NAME}`,
+    "X-Title": APP_NAME,
   };
 }
 
@@ -201,6 +205,7 @@ export const openRouterProvider: AIProvider = {
                 yield content;
               }
             } catch {
+              
             }
           }
         }
@@ -208,6 +213,7 @@ export const openRouterProvider: AIProvider = {
         try {
           await reader.cancel();
         } catch {
+          
         }
 
         reader.releaseLock();
