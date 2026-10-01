@@ -4,28 +4,36 @@ import LoginForm from "@/components/auth/login-form";
 
 export default function LoginPage() {
     return (
-        <main className="flex min-h-screen items-center justify-center px-6">
-            <div className="w-full max-w-md space-y-8">
-                <div className="space-y-2 text-center">
-                    <h1 className="text-3xl font-bold">Welcome back</h1>
+        <div>
+            <div>
+                <p className="text-sm font-semibold text-primary">
+                    Welcome back
+                </p>
 
-                    <p className="text-muted-foreground">
-                        Sign in to continue to DevHub AI.
-                    </p>
-                </div>
+                <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+                    Sign in to your workspace
+                </h1>
 
-                <LoginForm />
-
-                <p className="text-center text-sm text-muted-foreground">
-                    Don&apos;t have an account?{" "}
-                    <Link
-                        href="/register"
-                        className="font-medium text-foreground underline"
-                    >
-                        Create one
-                    </Link>
+                <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                    Continue building your knowledge
+                    vault and preparing for your next
+                    technical interview.
                 </p>
             </div>
-        </main>
+
+            <div className="mt-8 rounded-2xl border bg-card p-5 shadow-sm sm:p-6">
+                <LoginForm />
+            </div>
+
+            <p className="mt-6 text-center text-sm text-muted-foreground">
+                Don&apos;t have an account?{" "}
+                <Link
+                    href="/register"
+                    className="font-semibold text-primary underline decoration-primary/30 underline-offset-4 transition-colors hover:decoration-primary"
+                >
+                    Create an account
+                </Link>
+            </p>
+        </div>
     );
 }

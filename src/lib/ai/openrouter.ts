@@ -1,21 +1,15 @@
 import type { AIProvider } from "./types";
-
-const apiKey = process.env.OPENROUTER_API_KEY;
-
-if (!apiKey) {
-  throw new Error("OPENROUTER_API_KEY is not configured.");
-}
+import { aiConfig } from "./config";
+import { APP_NAME } from "../constants";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
-
-const model = process.env.OPENROUTER_MODEL ?? "openrouter/free";
 
 function getHeaders(): HeadersInit {
   return {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${apiKey}`,
-    "HTTP-Referer": "http://localhost:3000",
-    "X-Title": "DevHub AI",
+    Authorization: `Bearer ${aiConfig.openrouter.apiKey}`,
+    "HTTP-Referer": aiConfig.appUrl,
+    "X-Title": `${APP_NAME}`,
   };
 }
 
@@ -45,25 +39,27 @@ function extractMessageContent(content: unknown): string {
 }
 
 export const openRouterProvider: AIProvider = {
-  async generateText(prompt: string): Promise<string> {
+  async generateText(prompt: string, signal?: AbortSignal): Promise<string> {
     const response = await fetch(OPENROUTER_URL, {
       method: "POST",
       headers: getHeaders(),
+      signal,
       body: JSON.stringify({
-        model,
+        model: aiConfig.openrouter.model,
+
         messages: [
           {
             role: "user",
             content: prompt,
           },
         ],
+
         stream: false,
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-
       throw new Error(`OpenRouter ${response.status}: ${errorText}`);
     }
 
@@ -78,18 +74,24 @@ export const openRouterProvider: AIProvider = {
     return extractMessageContent(data.choices?.[0]?.message?.content);
   },
 
-  async streamText(prompt: string): Promise<AsyncIterable<string>> {
+  async streamText(
+    prompt: string,
+    signal?: AbortSignal,
+  ): Promise<AsyncIterable<string>> {
     const response = await fetch(OPENROUTER_URL, {
       method: "POST",
       headers: getHeaders(),
+      signal,
       body: JSON.stringify({
-        model,
+        model: aiConfig.openrouter.model,
+
         messages: [
           {
             role: "user",
             content: prompt,
           },
         ],
+
         stream: true,
       }),
     });
@@ -105,6 +107,7 @@ export const openRouterProvider: AIProvider = {
     }
 
     const reader = response.body.getReader();
+
     const decoder = new TextDecoder();
 
     return (async function* () {
@@ -112,6 +115,10 @@ export const openRouterProvider: AIProvider = {
 
       try {
         while (true) {
+          if (signal?.aborted) {
+            return;
+          }
+
           const { value, done } = await reader.read();
 
           if (done) {
@@ -157,7 +164,7 @@ export const openRouterProvider: AIProvider = {
                   yield content;
                 }
               } catch {
-                // Ignore malformed/incomplete SSE data.
+                
               }
             }
           }
@@ -194,11 +201,15 @@ export const openRouterProvider: AIProvider = {
                 yield content;
               }
             } catch {
-              // Ignore malformed/incomplete SSE data.
             }
           }
         }
       } finally {
+        try {
+          await reader.cancel();
+        } catch {
+        }
+
         reader.releaseLock();
       }
     })();

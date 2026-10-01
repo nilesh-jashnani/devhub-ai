@@ -1,5 +1,13 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import {
+    ArrowLeft,
+    Brain,
+    FileText,
+    LayoutDashboard,
+    ShieldCheck,
+    Users,
+} from "lucide-react";
 
 import { isAdmin } from "@/lib/auth-helper";
 import { APP_NAME } from "@/lib/constants";
@@ -7,6 +15,29 @@ import { APP_NAME } from "@/lib/constants";
 type AdminLayoutProps = {
     children: React.ReactNode;
 };
+
+const navigation = [
+    {
+        href: "/admin",
+        label: "Overview",
+        icon: LayoutDashboard,
+    },
+    {
+        href: "/admin/users",
+        label: "Users",
+        icon: Users,
+    },
+    {
+        href: "/admin/notes",
+        label: "Notes",
+        icon: FileText,
+    },
+    {
+        href: "/admin/ai",
+        label: "AI Usage",
+        icon: Brain,
+    },
+];
 
 async function AdminAuthBoundary({
     children,
@@ -16,13 +47,22 @@ async function AdminAuthBoundary({
     return children;
 }
 
-function AdminLoading() {
+function AdminAuthLoading() {
     return (
-        <main className="mx-auto max-w-7xl px-6 py-8">
-            <div className="animate-pulse">
-                <div className="h-8 w-64 rounded-md bg-muted" />
+        <main
+            className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8"
+            aria-busy="true"
+        >
+            <span className="sr-only">
+                Verifying administrator access...
+            </span>
 
-                <div className="mt-3 h-4 w-96 max-w-full rounded-md bg-muted" />
+            <div className="animate-pulse">
+                <div className="h-4 w-32 rounded bg-muted" />
+
+                <div className="mt-4 h-9 w-72 max-w-full rounded-lg bg-muted" />
+
+                <div className="mt-3 h-5 w-96 max-w-full rounded bg-muted" />
 
                 <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {Array.from({
@@ -30,7 +70,7 @@ function AdminLoading() {
                     }).map((_, index) => (
                         <div
                             key={index}
-                            className="h-28 rounded-xl border bg-muted/30"
+                            className="h-32 rounded-2xl border bg-muted/30"
                         />
                     ))}
                 </div>
@@ -44,61 +84,91 @@ export default function AdminLayout({
 }: AdminLayoutProps) {
     return (
         <div className="min-h-screen bg-background">
-            <header className="border-b">
-                <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-                    <div>
+            <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur-xl">
+                <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+                    <div className="flex items-center justify-between gap-4">
                         <Link
                             href="/admin"
-                            className="text-lg font-bold"
+                            className="flex items-center gap-3"
                         >
-                            {APP_NAME} Admin
-                        </Link>
+                            <span className="flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+                                <ShieldCheck
+                                    className="size-5"
+                                    aria-hidden="true"
+                                />
+                            </span>
 
-                        <p className="text-xs text-muted-foreground">
-                            Administration
-                        </p>
-                    </div>
+                            <span>
+                                <span className="block text-sm font-bold tracking-tight">
+                                    {APP_NAME}
+                                </span>
 
-                    <nav className="flex items-center gap-5 text-sm">
-                        <Link
-                            href="/admin"
-                            className="hover:underline"
-                        >
-                            Overview
-                        </Link>
-
-                        <Link
-                            href="/admin/users"
-                            className="hover:underline"
-                        >
-                            Users
-                        </Link>
-
-                        <Link
-                            href="/admin/notes"
-                            className="hover:underline"
-                        >
-                            Notes
-                        </Link>
-
-                        <Link
-                            href="/admin/ai"
-                            className="hover:underline"
-                        >
-                            AI Usage
+                                <span className="block text-xs text-muted-foreground">
+                                    Administration
+                                </span>
+                            </span>
                         </Link>
 
                         <Link
                             href="/dashboard"
-                            className="text-muted-foreground hover:text-foreground"
+                            className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground lg:hidden"
                         >
-                            ← Dashboard
+                            <ArrowLeft className="size-3.5" />
+                            Dashboard
                         </Link>
-                    </nav>
+                    </div>
+
+                    <div className="flex items-center gap-3 overflow-x-auto">
+                        <nav
+                            aria-label="Admin navigation"
+                            className="flex min-w-max items-center gap-1 rounded-xl border bg-muted/20 p-1"
+                        >
+                            {navigation.map(
+                                (item) => {
+                                    const Icon =
+                                        item.icon;
+
+                                    return (
+                                        <Link
+                                            key={
+                                                item.href
+                                            }
+                                            href={
+                                                item.href
+                                            }
+                                            className="inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-background hover:text-foreground hover:shadow-sm"
+                                        >
+                                            <Icon
+                                                className="size-4"
+                                                aria-hidden="true"
+                                            />
+
+                                            {
+                                                item.label
+                                            }
+                                        </Link>
+                                    );
+                                },
+                            )}
+                        </nav>
+
+                        <Link
+                            href="/dashboard"
+                            className="hidden min-w-max items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground lg:inline-flex"
+                        >
+                            <ArrowLeft
+                                className="size-4"
+                                aria-hidden="true"
+                            />
+                            Dashboard
+                        </Link>
+                    </div>
                 </div>
             </header>
 
-            <Suspense fallback={<AdminLoading />}>
+            <Suspense
+                fallback={<AdminAuthLoading />}
+            >
                 <AdminAuthBoundary>
                     {children}
                 </AdminAuthBoundary>

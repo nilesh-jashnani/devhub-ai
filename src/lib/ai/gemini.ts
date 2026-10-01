@@ -1,18 +1,35 @@
 import { GoogleGenAI } from "@google/genai";
 import type { AIProvider } from "./types";
+import { aiConfig } from "./config";
 
-const apiKey = process.env.GEMINI_API_KEY;
-
-if (!apiKey) {
-  throw new Error("GEMINI_API_KEY is not configured.");
-}
-
-const ai = new GoogleGenAI({ apiKey });
+const ai = new GoogleGenAI({
+  apiKey: aiConfig.gemini.apiKey,
+});
 
 const MAX_RETRIES = 3;
 
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+function sleep(ms: number, signal?: AbortSignal) {
+  return new Promise<void>((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new DOMException("The operation was aborted.", "AbortError"));
+
+      return;
+    }
+
+    const timeoutId = setTimeout(resolve, ms);
+
+    signal?.addEventListener(
+      "abort",
+      () => {
+        clearTimeout(timeoutId);
+
+        reject(new DOMException("The operation was aborted.", "AbortError"));
+      },
+      {
+        once: true,
+      },
+    );
+  });
 }
 
 function isRetryableError(error: unknown) {
@@ -32,7 +49,7 @@ export const geminiProvider: AIProvider = {
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       try {
         const response = await ai.models.generateContent({
-          model: process.env.GEMINI_MODEL ?? "gemini-3.8-flash",
+          model: aiConfig.gemini.model,
           contents: prompt,
         });
 
@@ -53,5 +70,63 @@ export const geminiProvider: AIProvider = {
     }
 
     throw lastError;
+  },
+
+  async streamText(prompt: string, signal?: AbortSignal) {
+    async function* stream() {
+      let lastError: unknown;
+
+      for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        try {
+          if (signal?.aborted) {
+            throw new DOMException("The operation was aborted.", "AbortError");
+          }
+
+          const response = await ai.models.generateContentStream({
+            model: aiConfig.gemini.model,
+            contents: prompt,
+          });
+
+          for await (const chunk of response) {
+            if (signal?.aborted) {
+              throw new DOMException(
+                "The operation was aborted.",
+                "AbortError",
+              );
+            }
+
+            const text = chunk.text ?? "";
+
+            if (text) {
+              yield text;
+            }
+          }
+
+          return;
+        } catch (error) {
+          lastError = error;
+
+          if (signal?.aborted) {
+            throw new DOMException("The operation was aborted.", "AbortError");
+          }
+
+          if (!isRetryableError(error) || attempt === MAX_RETRIES) {
+            throw error;
+          }
+
+          const delay = 1000 * 2 ** attempt;
+
+          console.warn(
+            `Gemini streaming request failed. Retrying in ${delay}ms...`,
+          );
+
+          await sleep(delay, signal);
+        }
+      }
+
+      throw lastError;
+    }
+
+    return stream();
   },
 };

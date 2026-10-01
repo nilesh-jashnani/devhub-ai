@@ -27,7 +27,7 @@ export async function ProgressSection({
 
     const completedTopics =
         progress.filter(
-            (item) => item.completed
+            (item) => item.completed,
         ).length;
 
     const completionPercentage =
@@ -36,14 +36,14 @@ export async function ProgressSection({
             : Math.round(
                 (completedTopics /
                     notes.length) *
-                100
+                100,
             );
 
     const scores = progress
         .map((item) => item.score)
         .filter(
             (score): score is number =>
-                score !== null
+                score !== null,
         );
 
     const averageScore =
@@ -53,17 +53,16 @@ export async function ProgressSection({
                 scores.reduce(
                     (total, score) =>
                         total + score,
-                    0
-                ) / scores.length
+                    0,
+                ) / scores.length,
             );
-
 
     const progressByNoteId =
         new Map(
             progress.map((item) => [
                 item.noteId,
                 item,
-            ])
+            ]),
         );
 
     const needsReview = notes
@@ -76,7 +75,7 @@ export async function ProgressSection({
 
             progress:
                 progressByNoteId.get(
-                    note.id
+                    note.id,
                 ),
         }))
         .filter(
@@ -84,16 +83,16 @@ export async function ProgressSection({
                 progress?.score !== null &&
                 progress?.score !==
                 undefined &&
-                progress.score < 60
+                progress.score < 60,
         )
         .sort(
             (a, b) =>
                 (a.progress?.score ?? 0) -
-                (b.progress?.score ?? 0)
+                (b.progress?.score ?? 0),
         );
 
     return (
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-5 lg:grid-cols-2">
             <LearningProgress
                 totalNotes={notes.length}
                 completedTopics={

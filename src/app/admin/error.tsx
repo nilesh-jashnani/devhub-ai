@@ -2,50 +2,15 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import {
+    ArrowLeft,
+    RefreshCw,
+    ShieldAlert,
+} from "lucide-react";
 
 import { APP_NAME } from "@/lib/constants";
 
-function ErrorIcon() {
-    return (
-        <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            className="size-6"
-            aria-hidden="true"
-        >
-            <circle
-                cx="12"
-                cy="12"
-                r="9"
-            />
-
-            <path d="M12 7.5v5" />
-            <path d="M12 16.5h.01" />
-        </svg>
-    );
-}
-
-function RefreshIcon() {
-    return (
-        <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            className="size-4"
-            aria-hidden="true"
-        >
-            <path d="M20 6v5h-5" />
-            <path d="M4 18v-5h5" />
-            <path d="M6.1 9A7 7 0 0 1 18 6l2 5" />
-            <path d="M17.9 15A7 7 0 0 1 6 18l-2-5" />
-        </svg>
-    );
-}
-
-export default function DashboardError({
+export default function AdminError({
     error,
     reset,
 }: {
@@ -56,7 +21,7 @@ export default function DashboardError({
 }) {
     useEffect(() => {
         console.error(
-            "Dashboard error:",
+            "Admin error:",
             error,
         );
     }, [error]);
@@ -65,23 +30,28 @@ export default function DashboardError({
         <main className="mx-auto flex min-h-[65vh] w-full max-w-2xl items-center justify-center px-4 py-12 sm:px-6">
             <div className="w-full rounded-3xl border bg-card p-7 text-center shadow-sm sm:p-10">
                 <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-destructive/10 text-destructive">
-                    <ErrorIcon />
+                    <ShieldAlert
+                        className="size-6"
+                        aria-hidden="true"
+                    />
                 </div>
 
                 <p className="mt-5 text-sm font-semibold text-destructive">
-                    Unable to load this
-                    section
+                    Administration error
                 </p>
 
                 <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
-                    Something went wrong
+                    We couldn&apos;t load
+                    this admin section
                 </h1>
 
                 <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted-foreground">
-                    We couldn&apos;t load
-                    this part of {APP_NAME}.
-                    You can retry the request
-                    or return to your
+                    {APP_NAME} encountered
+                    an unexpected problem
+                    while loading
+                    administration data.
+                    Retry the request or
+                    return to your
                     dashboard.
                 </p>
 
@@ -98,15 +68,22 @@ export default function DashboardError({
                         onClick={reset}
                         className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
                     >
-                        <RefreshIcon />
+                        <RefreshCw
+                            className="size-4"
+                            aria-hidden="true"
+                        />
                         Try again
                     </button>
 
                     <Link
                         href="/dashboard"
-                        className="inline-flex h-10 items-center justify-center rounded-xl border bg-background px-4 text-sm font-semibold transition-colors hover:bg-muted"
+                        className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border bg-background px-4 text-sm font-semibold transition-colors hover:bg-muted"
                     >
-                        Back to dashboard
+                        <ArrowLeft
+                            className="size-4"
+                            aria-hidden="true"
+                        />
+                        Dashboard
                     </Link>
                 </div>
             </div>

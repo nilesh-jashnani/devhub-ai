@@ -1,3 +1,4 @@
+import { Temporal } from "temporal-polyfill";
 import { auth } from "@/auth";
 import { db } from "@/prisma/db";
 import { progressSchema } from "@/lib/validations/progress";
@@ -70,13 +71,9 @@ export async function POST(request: Request) {
     } else {
       await db.orm.public.Progress.create({
         userId: session.user.id,
-
         noteId,
-
         completed,
-
         score: score ?? null,
-
         lastViewedAt: now,
       });
     }
@@ -87,7 +84,6 @@ export async function POST(request: Request) {
       progress: {
         completed,
         score: score ?? null,
-
         lastViewedAt: now.toString(),
       },
     });

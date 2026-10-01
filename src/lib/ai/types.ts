@@ -1,4 +1,8 @@
 export interface AIProvider {
-  generateText(prompt: string): Promise<string>;
-  streamText(prompt: string): Promise<AsyncIterable<string>>;
+  generateText(prompt: string, signal?: AbortSignal): Promise<string>;
+
+  streamText(
+    prompt: string,
+    signal?: AbortSignal,
+  ): Promise<AsyncIterable<string>>;
 }

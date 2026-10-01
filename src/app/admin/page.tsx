@@ -1,5 +1,15 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import {
+    ArrowRight,
+    Bookmark,
+    Brain,
+    CheckCircle2,
+    FileText,
+    ShieldCheck,
+    TrendingUp,
+    Users,
+} from "lucide-react";
 
 import { db } from "@/prisma/db";
 import { isAdmin } from "@/lib/auth-helper";
@@ -7,25 +17,32 @@ import { APP_NAME } from "@/lib/constants";
 
 function AdminDashboardLoading() {
     return (
-        <div className="mt-8 space-y-8">
+        <div
+            className="mt-8 space-y-8"
+            aria-busy="true"
+        >
+            <span className="sr-only">
+                Loading administration statistics...
+            </span>
+
             <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {Array.from({
                     length: 4,
                 }).map((_, index) => (
                     <div
                         key={index}
-                        className="h-28 animate-pulse rounded-xl border bg-muted/30"
+                        className="h-36 animate-pulse rounded-2xl border bg-muted/30"
                     />
                 ))}
             </section>
 
-            <section className="grid gap-6 lg:grid-cols-3">
+            <section className="grid gap-4 md:grid-cols-3">
                 {Array.from({
                     length: 3,
                 }).map((_, index) => (
                     <div
                         key={index}
-                        className="h-28 animate-pulse rounded-xl border bg-muted/30"
+                        className="h-28 animate-pulse rounded-2xl border bg-muted/30"
                     />
                 ))}
             </section>
@@ -83,149 +100,267 @@ async function AdminDashboardContent() {
 
     const stats = [
         {
-            label: "Total Users",
+            label: "Total users",
             value: users.length,
+            description:
+                "Registered accounts",
             href: "/admin/users",
+            icon: Users,
         },
         {
-            label: "Total Notes",
+            label: "Total notes",
             value: notes.length,
+            description:
+                "Knowledge entries",
             href: "/admin/notes",
+            icon: FileText,
         },
         {
             label: "Bookmarks",
             value: bookmarks.length,
+            description:
+                "Saved note references",
             href: "/admin/notes",
+            icon: Bookmark,
         },
         {
-            label: "AI Generations",
+            label: "AI generations",
             value: aiGenerations.length,
+            description:
+                "Generated responses",
             href: "/admin/ai",
+            icon: Brain,
+        },
+    ];
+
+    const platformStats = [
+        {
+            label: "Administrators",
+            value: adminCount.toString(),
+            description:
+                "Accounts with admin access",
+            icon: ShieldCheck,
+        },
+        {
+            label: "Completed topics",
+            value: completedTopics.toString(),
+            description:
+                "Learning items completed",
+            icon: CheckCircle2,
+        },
+        {
+            label: "Average confidence",
+            value: `${averageScore}%`,
+            description:
+                "Across scored progress",
+            icon: TrendingUp,
         },
     ];
 
     return (
         <>
-            <div className="flex items-start justify-between gap-6">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold">
-                        Admin Dashboard
+                    <div className="inline-flex items-center gap-2 rounded-full border bg-primary/[0.05] px-3 py-1.5 text-xs font-semibold text-primary">
+                        <ShieldCheck
+                            className="size-3.5"
+                            aria-hidden="true"
+                        />
+                        Platform administration
+                    </div>
+
+                    <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
+                        Admin dashboard
                     </h1>
 
-                    <p className="mt-2 text-muted-foreground">
-                        Platform activity and
-                        administration for{" "}
-                        {APP_NAME}.
+                    <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+                        Monitor platform activity,
+                        manage users, review public
+                        content, and inspect AI usage
+                        across {APP_NAME}.
                     </p>
                 </div>
 
-                <div className="text-right text-sm">
-                    <p className="text-muted-foreground">
+                <div className="rounded-xl border bg-card px-4 py-3 sm:text-right">
+                    <p className="text-xs font-medium text-muted-foreground">
                         Signed in as
                     </p>
 
-                    <p className="font-medium">
+                    <p className="mt-1 max-w-[260px] truncate text-sm font-semibold">
                         {session.user.email}
                     </p>
                 </div>
             </div>
 
-            <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                {stats.map((stat) => (
-                    <Link
-                        key={stat.label}
-                        href={stat.href}
-                        className="rounded-xl border p-5 transition-colors hover:bg-muted/50"
-                    >
-                        <p className="text-sm text-muted-foreground">
-                            {stat.label}
-                        </p>
+            <section
+                aria-label="Platform statistics"
+                className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+            >
+                {stats.map((stat) => {
+                    const Icon =
+                        stat.icon;
 
-                        <p className="mt-2 text-3xl font-bold">
-                            {stat.value}
-                        </p>
-                    </Link>
-                ))}
+                    return (
+                        <Link
+                            key={
+                                stat.label
+                            }
+                            href={stat.href}
+                            className="group rounded-2xl border bg-card p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md"
+                        >
+                            <div className="flex items-start justify-between gap-4">
+                                <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                                    <Icon
+                                        className="size-5"
+                                        aria-hidden="true"
+                                    />
+                                </div>
+
+                                <ArrowRight
+                                    className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+                                    aria-hidden="true"
+                                />
+                            </div>
+
+                            <p className="mt-5 text-3xl font-bold tracking-tight">
+                                {stat.value}
+                            </p>
+
+                            <p className="mt-1 text-sm font-semibold">
+                                {stat.label}
+                            </p>
+
+                            <p className="mt-1 text-xs text-muted-foreground">
+                                {
+                                    stat.description
+                                }
+                            </p>
+                        </Link>
+                    );
+                })}
             </section>
 
-            <section className="mt-8 grid gap-6 lg:grid-cols-3">
-                <div className="rounded-xl border p-6">
-                    <p className="text-sm text-muted-foreground">
-                        Administrators
-                    </p>
+            <section className="mt-8 grid gap-4 md:grid-cols-3">
+                {platformStats.map(
+                    (stat) => {
+                        const Icon =
+                            stat.icon;
 
-                    <p className="mt-2 text-2xl font-bold">
-                        {adminCount}
-                    </p>
-                </div>
+                        return (
+                            <article
+                                key={
+                                    stat.label
+                                }
+                                className="rounded-2xl border bg-card p-5"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="flex size-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                                        <Icon
+                                            className="size-4"
+                                            aria-hidden="true"
+                                        />
+                                    </div>
 
-                <div className="rounded-xl border p-6">
-                    <p className="text-sm text-muted-foreground">
-                        Completed Topics
-                    </p>
+                                    <p className="text-sm font-medium text-muted-foreground">
+                                        {
+                                            stat.label
+                                        }
+                                    </p>
+                                </div>
 
-                    <p className="mt-2 text-2xl font-bold">
-                        {completedTopics}
-                    </p>
-                </div>
+                                <p className="mt-4 text-2xl font-bold">
+                                    {
+                                        stat.value
+                                    }
+                                </p>
 
-                <div className="rounded-xl border p-6">
-                    <p className="text-sm text-muted-foreground">
-                        Average Confidence
-                    </p>
-
-                    <p className="mt-2 text-2xl font-bold">
-                        {averageScore}%
-                    </p>
-                </div>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    {
+                                        stat.description
+                                    }
+                                </p>
+                            </article>
+                        );
+                    },
+                )}
             </section>
 
             <section className="mt-10">
-                <h2 className="text-xl font-semibold">
-                    Administration
-                </h2>
+                <div>
+                    <p className="text-sm font-semibold text-primary">
+                        Management
+                    </p>
 
-                <div className="mt-4 grid gap-4 md:grid-cols-3">
+                    <h2 className="mt-1 text-xl font-bold tracking-tight">
+                        Administration tools
+                    </h2>
+                </div>
+
+                <div className="mt-5 grid gap-4 md:grid-cols-3">
                     <Link
                         href="/admin/users"
-                        className="rounded-xl border p-6 transition-colors hover:bg-muted/50"
+                        className="group rounded-2xl border bg-card p-6 transition-all hover:border-primary/25 hover:shadow-sm"
                     >
-                        <h3 className="font-semibold">
-                            Users
+                        <Users className="size-5 text-primary" />
+
+                        <h3 className="mt-4 font-semibold">
+                            User management
                         </h3>
 
-                        <p className="mt-2 text-sm text-muted-foreground">
-                            View users and manage
-                            platform roles.
+                        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                            Review registered
+                            accounts and manage
+                            administrator roles.
                         </p>
+
+                        <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+                            Manage users
+                            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                        </span>
                     </Link>
 
                     <Link
                         href="/admin/notes"
-                        className="rounded-xl border p-6 transition-colors hover:bg-muted/50"
+                        className="group rounded-2xl border bg-card p-6 transition-all hover:border-primary/25 hover:shadow-sm"
                     >
-                        <h3 className="font-semibold">
-                            Content
+                        <FileText className="size-5 text-primary" />
+
+                        <h3 className="mt-4 font-semibold">
+                            Content management
                         </h3>
 
-                        <p className="mt-2 text-sm text-muted-foreground">
-                            Review notes created
-                            across the platform.
+                        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                            Review notes and
+                            control which content
+                            appears publicly.
                         </p>
+
+                        <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+                            Review notes
+                            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                        </span>
                     </Link>
 
                     <Link
                         href="/admin/ai"
-                        className="rounded-xl border p-6 transition-colors hover:bg-muted/50"
+                        className="group rounded-2xl border bg-card p-6 transition-all hover:border-primary/25 hover:shadow-sm"
                     >
-                        <h3 className="font-semibold">
-                            AI Usage
+                        <Brain className="size-5 text-primary" />
+
+                        <h3 className="mt-4 font-semibold">
+                            AI activity
                         </h3>
 
-                        <p className="mt-2 text-sm text-muted-foreground">
-                            Inspect AI generation
-                            activity.
+                        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                            Inspect recent AI
+                            generations across the
+                            platform.
                         </p>
+
+                        <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+                            View activity
+                            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                        </span>
                     </Link>
                 </div>
             </section>
@@ -235,7 +370,7 @@ async function AdminDashboardContent() {
 
 export default function AdminPage() {
     return (
-        <main className="mx-auto max-w-7xl p-8">
+        <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
             <Suspense
                 fallback={
                     <AdminDashboardLoading />

@@ -1,36 +1,40 @@
 import Link from "next/link";
 
 import { RegisterForm } from "@/components/auth/register-form";
-import { APP_NAME } from "@/lib/constants";
 
 export default function RegisterPage() {
     return (
-        <main className="flex min-h-screen items-center justify-center px-6 py-12">
-            <div className="w-full max-w-md">
-                <div className="mb-8 text-center">
-                    <h1 className="mt-6 text-3xl font-bold">
-                        Create your account
-                    </h1>
+        <div>
+            <div>
+                <p className="text-sm font-semibold text-primary">
+                    Get started
+                </p>
 
-                    <p className="mt-2 text-sm text-muted-foreground">
-                        Start building your personal developer knowledge base.
-                    </p>
-                </div>
+                <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+                    Create your account
+                </h1>
 
-                <div className="rounded-xl border p-6 shadow-sm">
-                    <RegisterForm />
-                </div>
-
-                <p className="mt-6 text-center text-sm text-muted-foreground">
-                    Already have an account?{" "}
-                    <Link
-                        href="/login"
-                        className="font-medium text-foreground hover:underline"
-                    >
-                        Sign in
-                    </Link>
+                <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                    Start building your personal
+                    developer knowledge base and turn
+                    what you learn into practical
+                    interview preparation.
                 </p>
             </div>
-        </main>
+
+            <div className="mt-8 rounded-2xl border bg-card p-5 shadow-sm sm:p-6">
+                <RegisterForm />
+            </div>
+
+            <p className="mt-6 text-center text-sm text-muted-foreground">
+                Already have an account?{" "}
+                <Link
+                    href="/login"
+                    className="font-semibold text-primary underline decoration-primary/30 underline-offset-4 transition-colors hover:decoration-primary"
+                >
+                    Sign in
+                </Link>
+            </p>
+        </div>
     );
 }

@@ -17,7 +17,50 @@ const initialState: LoginActionState = {
     message: "",
 };
 
-function LoginForm() {
+function LoadingIcon() {
+    return (
+        <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            className="size-4 animate-spin"
+            aria-hidden="true"
+        >
+            <circle
+                cx="12"
+                cy="12"
+                r="9"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="opacity-25"
+            />
+
+            <path
+                d="M21 12a9 9 0 0 0-9-9"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+            />
+        </svg>
+    );
+}
+
+function ArrowIcon() {
+    return (
+        <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="size-4"
+            aria-hidden="true"
+        >
+            <path d="M5 12h14" />
+            <path d="m15 8 4 4-4 4" />
+        </svg>
+    );
+}
+
+export default function LoginForm() {
     const [
         state,
         formAction,
@@ -34,8 +77,11 @@ function LoginForm() {
             noValidate
         >
             <div className="space-y-2">
-                <Label htmlFor="email">
-                    Email
+                <Label
+                    htmlFor="email"
+                    className="text-sm font-semibold"
+                >
+                    Email address
                 </Label>
 
                 <Input
@@ -43,37 +89,55 @@ function LoginForm() {
                     name="email"
                     type="email"
                     autoComplete="email"
+                    inputMode="email"
                     placeholder="you@example.com"
                     defaultValue={
-                        state.values?.email ?? ""
+                        state.values?.email ??
+                        ""
                     }
+                    disabled={isPending}
                     aria-invalid={
                         Boolean(
-                            state.errors?.email,
+                            state.errors
+                                ?.email,
                         )
                     }
                     aria-describedby={
                         state.errors?.email
-                            ? "email-error"
+                            ? "login-email-error"
                             : undefined
                     }
+                    className="h-11 rounded-xl"
                 />
 
-                {state.errors?.email?.map(
-                    (error) => (
-                        <p
-                            id="email-error"
-                            key={error}
-                            className="text-sm text-destructive"
-                        >
-                            {error}
-                        </p>
-                    ),
+                {state.errors?.email && (
+                    <div
+                        id="login-email-error"
+                        className="space-y-1"
+                    >
+                        {state.errors.email.map(
+                            (error) => (
+                                <p
+                                    key={
+                                        error
+                                    }
+                                    className="text-xs font-medium text-destructive"
+                                >
+                                    {
+                                        error
+                                    }
+                                </p>
+                            ),
+                        )}
+                    </div>
                 )}
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="password">
+                <Label
+                    htmlFor="password"
+                    className="text-sm font-semibold"
+                >
                     Password
                 </Label>
 
@@ -82,52 +146,82 @@ function LoginForm() {
                     name="password"
                     type="password"
                     autoComplete="current-password"
-                    placeholder="••••••••"
+                    placeholder="Enter your password"
+                    disabled={isPending}
                     aria-invalid={
                         Boolean(
-                            state.errors?.password,
+                            state.errors
+                                ?.password,
                         )
                     }
                     aria-describedby={
-                        state.errors?.password
-                            ? "password-error"
+                        state.errors
+                            ?.password
+                            ? "login-password-error"
                             : undefined
                     }
+                    className="h-11 rounded-xl"
                 />
 
-                {state.errors?.password?.map(
-                    (error) => (
-                        <p
-                            id="password-error"
-                            key={error}
-                            className="text-sm text-destructive"
-                        >
-                            {error}
-                        </p>
-                    ),
+                {state.errors?.password && (
+                    <div
+                        id="login-password-error"
+                        className="space-y-1"
+                    >
+                        {state.errors.password.map(
+                            (error) => (
+                                <p
+                                    key={
+                                        error
+                                    }
+                                    className="text-xs font-medium text-destructive"
+                                >
+                                    {
+                                        error
+                                    }
+                                </p>
+                            ),
+                        )}
+                    </div>
                 )}
             </div>
 
             {state.message && (
-                <p
+                <div
                     role="alert"
-                    className="text-sm text-destructive"
+                    aria-live="polite"
+                    className="rounded-xl border border-destructive/30 bg-destructive/[0.06] px-4 py-3"
                 >
-                    {state.message}
-                </p>
+                    <p className="text-sm font-medium text-destructive">
+                        {state.message}
+                    </p>
+                </div>
             )}
 
             <Button
                 type="submit"
                 disabled={isPending}
-                className="w-full cursor-pointer"
+                className="h-11 w-full cursor-pointer rounded-xl font-semibold"
             >
-                {isPending
-                    ? "Signing in..."
-                    : "Sign in"}
+                {isPending ? (
+                    <>
+                        <LoadingIcon />
+                        Signing in...
+                    </>
+                ) : (
+                    <>
+                        Sign in
+                        <ArrowIcon />
+                    </>
+                )}
             </Button>
+
+            <p className="text-center text-xs leading-5 text-muted-foreground">
+                Sign in to access your
+                notes, bookmarks, progress,
+                AI mentor, and interview
+                preparation.
+            </p>
         </form>
     );
 }
-
-export default LoginForm;
