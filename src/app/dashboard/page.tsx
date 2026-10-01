@@ -95,13 +95,13 @@ export default async function DashboardPage() {
                     </div>
 
                     <div className="flex flex-col gap-3 sm:flex-row">
-                        <Link
+                        <a
                             href="/dashboard/notes/new"
                             className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                         >
                             <PlusIcon />
                             New note
-                        </Link>
+                        </a>
 
                         <Link
                             href="/dashboard/ai"

@@ -185,7 +185,7 @@ export default function Home() {
                 size="lg"
                 className="h-12 rounded-xl px-6 font-semibold"
               >
-                <Link href="/register">
+                <Link href="/register" className="flex justify-center align-center">
                   Start building
                   your vault
 
@@ -538,7 +538,7 @@ export default function Home() {
                 size="lg"
                 className="h-12 rounded-xl px-6 font-semibold"
               >
-                <Link href="/register">
+                <Link href="/register" className="flex justify-center align-center">
                   Create your vault
 
                   <ArrowRight
