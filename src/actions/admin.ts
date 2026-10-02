@@ -51,9 +51,9 @@ export async function updateNotePublished(formData: FormData) {
   await isAdmin();
 
   const parsed = updateNotePublishedSchema.safeParse({
-    noteId: formData.get("noteId"),
-    published: formData.get("published"),
-  });
+      noteId: formData.get("noteId"),
+      published: formData.get("published"),
+    });
 
   if (!parsed.success) {
     console.error("Invalid publish update:", parsed.error.flatten());
@@ -67,15 +67,24 @@ export async function updateNotePublished(formData: FormData) {
   });
 
   if (!note) {
+    console.error(
+      "Note not found while updating publication status:",
+      noteId,
+    );
     return;
   }
+
+  const shouldPublish = published === "true";
 
   await db.orm.public.Note.where({
     id: noteId,
   }).update({
-    published: published === "true",
+    published: shouldPublish,
   });
 
   revalidatePath("/admin");
   revalidatePath("/admin/notes");
+
+  revalidatePath("/learn");
+  revalidatePath(`/learn/${note.slug}`);
 }
