@@ -66,7 +66,6 @@ export async function createNote(
   }
 
   const rawTitle = formData.get("title");
-
   const rawContent = formData.get("content");
 
   const result = noteSchema.safeParse({
@@ -80,7 +79,6 @@ export async function createNote(
 
       values: {
         title: typeof rawTitle === "string" ? rawTitle : "",
-
         content: typeof rawContent === "string" ? rawContent : "",
       },
     };
@@ -99,7 +97,6 @@ export async function createNote(
     });
 
     revalidatePath("/dashboard/notes");
-
     revalidatePath("/dashboard");
 
     redirect(`/dashboard/notes/${note.slug}`);
@@ -119,9 +116,7 @@ export async function updateNote(
   }
 
   const rawNoteId = formData.get("noteId");
-
   const rawTitle = formData.get("title");
-
   const rawContent = formData.get("content");
 
   const result = updateNoteSchema.safeParse({
@@ -174,13 +169,17 @@ export async function updateNote(
       content,
     });
 
+    revalidatePath("/dashboard");
     revalidatePath("/dashboard/notes");
 
-    revalidatePath("/dashboard");
-
     revalidatePath(`/dashboard/notes/${oldSlug}`);
-
     revalidatePath(`/dashboard/notes/${slug}`);
+
+    if (note.published) {
+      revalidatePath("/learn");
+      revalidatePath(`/learn/${oldSlug}`);
+      revalidatePath(`/learn/${slug}`);
+    }
 
     redirect(`/dashboard/notes/${slug}`);
   } catch (error) {
@@ -219,9 +218,15 @@ export async function deleteNote(formData: FormData): Promise<void> {
     authorId: session.user.id,
   }).delete();
 
+  revalidatePath("/dashboard");
   revalidatePath("/dashboard/notes");
 
-  revalidatePath("/dashboard");
+  revalidatePath(`/dashboard/notes/${note.slug}`);
+
+  if (note.published) {
+    revalidatePath("/learn");
+    revalidatePath(`/learn/${note.slug}`);
+  }
 
   redirect("/dashboard/notes");
 }
@@ -245,10 +250,6 @@ export async function toggleBookmark(formData: FormData): Promise<void> {
 
   const note = await db.orm.public.Note.first({
     id: noteId,
-
-    // IMPORTANT:
-    // ensure the note belongs to
-    // the logged-in user.
     authorId: session.user.id,
   });
 
