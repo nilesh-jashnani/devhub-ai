@@ -136,7 +136,8 @@ export default async function AuthLayout({
                         className="relative inline-flex w-fit items-center gap-2.5"
                     >
                         <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-                            <LogoIcon />
+                            {/* <LogoIcon /> */}
+                            <LogoMark />
                         </span>
 
                         <span className="text-lg font-bold tracking-tight">
