@@ -1,6 +1,6 @@
 import Link from "next/link";
 import {
-    // BookOpen,
+    BookOpen,
     LayoutDashboard,
     LogIn,
     Brain
@@ -40,9 +40,12 @@ export default async function LearnLayout({
                             href="/"
                             className="flex shrink-0 items-center gap-2.5"
                         >
-                            <div className="flex size-9 items-center justify-center rounded-xl bg-foreground text-sm font-bold text-background">
+                            {/* <div className="flex size-9 items-center justify-center rounded-xl bg-foreground text-sm font-bold text-background">
                                 DH
-                            </div>
+                            </div> */}
+                            <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+                                <LogoMark />
+                            </span>
 
                             <span className="hidden font-semibold tracking-tight sm:inline">
                                 {APP_NAME}
@@ -57,13 +60,10 @@ export default async function LearnLayout({
                                 href="/learn"
                                 className="inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
                             >
-                                {/* <BookOpen
+                                <BookOpen
                                     className="size-4 text-primary"
                                     aria-hidden="true"
-                                /> */}
-                                <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-                                    <LogoMark />
-                                </span>
+                                />
                                 Learn
                             </Link>
                         </nav>
