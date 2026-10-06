@@ -215,8 +215,14 @@ export default async function DashboardLayout({
             </span>
           </Link>
 
-          <div className="flex size-9 items-center justify-center rounded-full border bg-background text-sm font-semibold">
-            {initial}
+          <div className="flex items-center gap-3">
+            <div
+              className="flex size-9 items-center justify-center rounded-full border bg-background text-sm font-semibold"
+              title={displayName}
+            >
+              {initial}
+            </div>
+            <LogoutButton />
           </div>
         </div>
 
@@ -226,15 +232,15 @@ export default async function DashboardLayout({
         >
           {navigation.map(
             (item) => (
-              <Link
+            <Link
                 key={
                   item.href
                 }
                 href={
                   item.href
                 }
-                className="flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
+              className="flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
                 {
                   item.icon
                 }
@@ -244,24 +250,24 @@ export default async function DashboardLayout({
                     item.label
                   }
                 </span>
-              </Link>
+            </Link>
             ),
           )}
 
           {session.user
             .role ===
             "ADMIN" && (
-              <Link
-                href="/admin"
-                className="flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                <AdminIcon />
+            <Link
+              href="/admin"
+              className="flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <AdminIcon />
 
                 <span>
                   Admin
                 </span>
-              </Link>
-            )}
+            </Link>
+          )}
         </nav>
       </header>
 
@@ -298,65 +304,65 @@ export default async function DashboardLayout({
           >
             {navigation.map(
               (item) => (
-                <Link
+              <Link
                   key={
                     item.href
                   }
                   href={
                     item.href
                   }
-                  className="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                >
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border bg-background transition-colors group-hover:border-border/80 group-hover:bg-background">
+                className="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border bg-background transition-colors group-hover:border-border/80 group-hover:bg-background">
                     {
                       item.icon
                     }
-                  </div>
+                </div>
 
-                  <div className="min-w-0">
-                    <div className="font-medium text-foreground">
+                <div className="min-w-0">
+                  <div className="font-medium text-foreground">
                       {
                         item.label
                       }
-                    </div>
+                  </div>
 
-                    <div className="truncate text-xs text-muted-foreground">
+                  <div className="truncate text-xs text-muted-foreground">
                       {
                         item.description
                       }
-                    </div>
                   </div>
-                </Link>
+                </div>
+              </Link>
               ),
             )}
 
             {session.user
               .role ===
               "ADMIN" && (
-                <>
-                  <div className="my-4 border-t" />
+              <>
+                <div className="my-4 border-t" />
 
-                  <Link
-                    href="/admin"
-                    className="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                  >
-                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border bg-background">
-                      <AdminIcon />
+                <Link
+                  href="/admin"
+                  className="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border bg-background">
+                    <AdminIcon />
+                  </div>
+
+                  <div>
+                    <div className="font-medium text-foreground">
+                      Admin
                     </div>
 
-                    <div>
-                      <div className="font-medium text-foreground">
-                        Admin
-                      </div>
-
-                      <div className="text-xs text-muted-foreground">
+                    <div className="text-xs text-muted-foreground">
                         Manage
                         DevHub AI
-                      </div>
                     </div>
-                  </Link>
-                </>
-              )}
+                  </div>
+                </Link>
+              </>
+            )}
           </nav>
         </div>
 
@@ -373,14 +379,14 @@ export default async function DashboardLayout({
 
               {session.user
                 .email && (
-                  <div className="truncate text-xs text-muted-foreground">
+                <div className="truncate text-xs text-muted-foreground">
                     {
                       session
                         .user
                         .email
                     }
-                  </div>
-                )}
+                </div>
+              )}
             </div>
           </div>
 

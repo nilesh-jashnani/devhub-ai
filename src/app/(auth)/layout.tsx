@@ -1,6 +1,9 @@
+import { redirect } from "next/navigation";
 import Link from "next/link";
 
 import { APP_NAME } from "@/lib/constants";
+
+import { auth } from "@/auth";
 
 function LogoIcon() {
     return (
@@ -90,11 +93,17 @@ const features = [
     },
 ];
 
-export default function AuthLayout({
+export default async function AuthLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const session = await auth();
+
+    if (session?.user?.id) {
+        redirect("/dashboard");
+    }
+
     return (
         <main className="min-h-screen bg-background">
             <div className="grid min-h-screen lg:grid-cols-[1.05fr_0.95fr]">
