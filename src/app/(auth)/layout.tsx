@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-
+import {
+    Brain
+} from "lucide-react";
 import { APP_NAME } from "@/lib/constants";
 
 import { auth } from "@/auth";
@@ -69,6 +71,17 @@ function InterviewIcon() {
             <path d="M9 8h6" />
             <path d="M9 12h4" />
         </svg>
+    );
+}
+
+function LogoMark() {
+    return (
+        <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+            <Brain
+                className="size-5"
+                aria-hidden="true"
+            />
+        </span>
     );
 }
 
@@ -203,7 +216,8 @@ export default async function AuthLayout({
                             className="mb-10 inline-flex items-center gap-2.5 lg:hidden"
                         >
                             <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                                <LogoIcon />
+                                {/* <LogoIcon /> */}
+                                <LogoMark />
                             </span>
 
                             <span className="text-lg font-bold tracking-tight">

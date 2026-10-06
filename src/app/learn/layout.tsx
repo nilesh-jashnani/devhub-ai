@@ -1,12 +1,24 @@
 import Link from "next/link";
 import {
-    BookOpen,
+    // BookOpen,
     LayoutDashboard,
     LogIn,
+    Brain
 } from "lucide-react";
 
 import { auth } from "@/auth";
 import { APP_NAME } from "@/lib/constants";
+
+function LogoMark() {
+    return (
+        <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+            <Brain
+                className="size-5"
+                aria-hidden="true"
+            />
+        </span>
+    );
+}
 
 export default async function LearnLayout({
     children,
@@ -45,10 +57,13 @@ export default async function LearnLayout({
                                 href="/learn"
                                 className="inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
                             >
-                                <BookOpen
+                                {/* <BookOpen
                                     className="size-4 text-primary"
                                     aria-hidden="true"
-                                />
+                                /> */}
+                                <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+                                    <LogoMark />
+                                </span>
                                 Learn
                             </Link>
                         </nav>
