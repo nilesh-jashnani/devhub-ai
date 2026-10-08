@@ -183,7 +183,7 @@ export default function Home() {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button
                 size="lg"
-                className="h-12 rounded-xl px-6 font-semibold"
+                className="h-12 rounded-xl px-6 cursor-pointer font-semibold"
               >
                 <Link href="/register" className="flex justify-center align-center">
                   Start building
@@ -199,7 +199,7 @@ export default function Home() {
               <Button
                 variant="outline"
                 size="lg"
-                className="h-12 rounded-xl px-6 font-semibold"
+                className="h-12 rounded-xl px-6 cursor-pointer font-semibold"
               >
                 <Link href="/learn">
                   Explore public
@@ -536,9 +536,9 @@ export default function Home() {
             <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
               <Button
                 size="lg"
-                className="h-12 rounded-xl px-6 font-semibold"
+                className="h-12 rounded-xl px-6 font-semibold cursor-pointer"
               >
-                <Link href="/register" className="flex justify-center align-center">
+                <Link href="/register" className="flex justify-center items-center">
                   Create your vault
 
                   <ArrowRight
@@ -551,7 +551,7 @@ export default function Home() {
               <Button
                 size="lg"
                 variant="outline"
-                className="h-12 rounded-xl px-6 font-semibold"
+                className="h-12 rounded-xl px-6 font-semibold cursor-pointer"
               >
                 <Link href="/login">
                   Sign in

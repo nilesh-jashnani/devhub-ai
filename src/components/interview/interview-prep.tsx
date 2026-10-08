@@ -356,7 +356,7 @@ export function InterviewPrep({
 
                 <a
                     href="/dashboard/notes/new"
-                    className="mt-6 inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                    className="mt-6 inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors cursor-pointer hover:bg-primary/90"
                 >
                     Create your first note
                 </a>

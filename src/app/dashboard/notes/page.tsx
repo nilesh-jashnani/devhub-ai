@@ -232,7 +232,7 @@ export default async function NotesPage({
                         ) : (
                             <a
                                 href="/dashboard/notes/new"
-                                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors cursor-pointer hover:bg-primary/90"
                             >
                                 <PlusIcon />
                                 Create your
